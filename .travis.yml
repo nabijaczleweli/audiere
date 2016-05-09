@@ -2,6 +2,8 @@ language: generic
 sudo: false
 cache:
   apt: true
+  directories:
+    - /tmp/tools
 
 env:
   global:
@@ -20,7 +22,6 @@ matrix:
         apt:
           packages:
             - g++-5
-            - cmake
             - unzip
             - libsndfile1-dev
             - libopenal-dev
@@ -33,7 +34,6 @@ matrix:
         apt:
           packages:
             - clang-3.8
-            - cmake
             - unzip
             - libsndfile1-dev
             - libopenal-dev

@@ -5,9 +5,13 @@ cache:
 
 env:
   global:
+    - PATH="$HOME/bin:$PATH"
     - LIB_INSTALLDIR="$HOME"
     - LD_LIBRARY_PATH="$LIB_INSTALLDIR/lib"
     - SPEEX_VER=1.1.9
+    - CMAKE_VERSION_PREFIX=3.5
+    - CMAKE_VERSION_FULL=3.5.2
+    - NINJA_VERSION=1.7.1
 
 matrix:
   include:
@@ -17,6 +21,7 @@ matrix:
           packages:
             - g++-5
             - cmake
+            - unzip
             - libsndfile1-dev
             - libopenal-dev
           sources: &sources
@@ -29,6 +34,7 @@ matrix:
           packages:
             - clang-3.8
             - cmake
+            - unzip
             - libsndfile1-dev
             - libopenal-dev
           sources: *sources
@@ -42,9 +48,24 @@ install:
   - ./configure --prefix="$LIB_INSTALLDIR"
   - make -j$(nproc) install
   - popd
+  -
+  - mkdir -p /tmp/tools
+  - pushd /tmp/tools
+  - if [[ ! -f "cmake-$CMAKE_VERSION_FULL-Linux-x86_64.sh" ]]; then
+      curl -SOL "https://cmake.org/files/v$CMAKE_VERSION_PREFIX/cmake-$CMAKE_VERSION_FULL-Linux-x86_64.sh";
+      chmod +x "cmake-$CMAKE_VERSION_FULL-Linux-x86_64.sh";
+    fi
+  - ./"cmake-$CMAKE_VERSION_FULL-Linux-x86_64.sh" --prefix="$HOME" --exclude-subdir --skip-license
+  -
+  - if [[ ! -f "ninja-$NINJA_VERSION.zip" ]]; then
+      curl -SLO "https://github.com/ninja-build/ninja/releases/download/v$NINJA_VERSION/ninja-linux.zip";
+      mv "ninja-linux.zip" "ninja-$NINJA_VERSION.zip";
+    fi
+  - unzip "ninja-$NINJA_VERSION.zip" -d "$HOME/bin"
+  - popd
 
 script:
   - mkdir -p build
   - cd build
-  - CXXFLAGS="-isystem$LIB_INSTALLDIR/include" LDFLAGS="-L$LIB_INSTALLDIR/lib" cmake -G"Unix Makefiles" ..
-  - make -j$(nproc)
+  - CXXFLAGS="-isystem$LIB_INSTALLDIR/include" LDFLAGS="-L$LIB_INSTALLDIR/lib" cmake -GNinja ..
+  - ninja

@@ -296,13 +296,13 @@ int speexfile::decode ( audio_sample *buffer )
                             strcpy ( speex_last_error, "Memory allocation failed" );
                             return -1;
                         }
-                    
+
                         stream[streamcount] = (speexstream_t *)calloc ( 1, sizeof (speexstream_t) );
                         if ( !stream[streamcount] ) {
                             strcpy ( speex_last_error, "Memory allocation failed" );
                             return -1;
                         }
-                    
+
                         stream[streamcount]->seekinfo = (speexseekinfo_t **)calloc ( 1, sizeof (speexseekinfo_t*) );
                         if ( !stream[streamcount]->seekinfo ) {
                             strcpy ( speex_last_error, "Memory allocation failed" );
@@ -569,12 +569,12 @@ int speexfile::readtags ( char *tagdata, long size )
 {
     if ( streamcount < 1 )
         return -1;
-    
+
     if ( size <= 0 )
         return -1;
 
     if ( stream[streamcount-1]->tags ) free ( stream[streamcount-1]->tags );
-    
+
     stream[streamcount-1]->tagcount = 0;
     stream[streamcount-1]->tags = (speextags **)malloc ( sizeof (speextags *) );
     if ( stream[streamcount-1]->tags == NULL ) {
@@ -598,7 +598,7 @@ int speexfile::readtags ( char *tagdata, long size )
         item  = c;
         value = c + ilen + 1;
     } else { // first tag field is comment
-        item  = "Comment";
+        item  = const_cast<char *>("Comment");
         value = c;
         vlen  = len;
         ilen  = strlen ( item );
@@ -747,7 +747,7 @@ int speexfile::initfile ()
     ogg_packet       op;
 
     int64_t chainsamples = 0;
-    
+
     ogg_sync_init ( &oy );
 
     if ( !seekable ) return 0;
@@ -786,13 +786,13 @@ int speexfile::initfile ()
                         strcpy ( speex_last_error, "Memory allocation failed" );
                         return -1;
                     }
-                    
+
                     stream[streamcount] = (speexstream_t *)calloc ( 1, sizeof (speexstream_t) );
                     if ( !stream[streamcount] ) {
                         strcpy ( speex_last_error, "Memory allocation failed" );
                         return -1;
                     }
-                    
+
                     stream[streamcount]->seekinfo = (speexseekinfo_t **)calloc ( 1, sizeof (speexseekinfo_t*) );
                     if ( !stream[streamcount]->seekinfo ) {
                         strcpy ( speex_last_error, "Memory allocation failed" );
@@ -889,7 +889,7 @@ void *speexfile::header_to_decoder ( SpeexHeader *header, int enh_enabled, int *
     modeID = header->mode;
     if ( forceMode != -1 )
         modeID = forceMode;
-    mode = speex_mode_list[modeID];
+    mode = const_cast<SpeexMode *>(speex_mode_list[modeID]);
 
     if ( mode->bitstream_version < header->mode_bitstream_version ) {
         strcpy ( speex_last_error, "The file was encoded with a newer version of Speex.\nYou need to upgrade in order to play it." );

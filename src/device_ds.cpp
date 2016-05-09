@@ -55,7 +55,7 @@ namespace audiere {
       0, 0, 0, 0,
       NULL, NULL, GetModuleHandle(NULL), NULL);
     if (!anonymous_window) {
-      return false;
+      return NULL;
     }
 
     ADR_LOG("Anonymous window created successfully");

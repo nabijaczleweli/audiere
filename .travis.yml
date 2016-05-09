@@ -10,6 +10,7 @@ env:
     - PATH="$HOME/bin:$PATH"
     - LIB_INSTALLDIR="$HOME"
     - LD_LIBRARY_PATH="$LIB_INSTALLDIR/lib"
+    - DUMB_VER=0.9.3
     - SPEEX_VER=1.1.9
     - CMAKE_VERSION_PREFIX=3.5
     - CMAKE_VERSION_FULL=3.5.2
@@ -17,7 +18,7 @@ env:
 
 matrix:
   include:
-    - env: CXX=g++-5 CC=gcc-5 DEPLOY=true
+    - env: CXX=g++-5 CC=gcc-5
       addons:
         apt:
           packages:
@@ -47,6 +48,18 @@ install:
   - curl -SL "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" > config.guess
   - ./configure --prefix="$LIB_INSTALLDIR"
   - make -j$(nproc) install
+  - popd
+  -
+  - pushd "/tmp"
+  - curl -SL "http://prdownloads.sourceforge.net/dumb/dumb-$DUMB_VER.tar.gz?download" | tar -xzf-
+  - cd "dumb-$DUMB_VER"
+  - (
+      echo "include make/unix.inc";
+      echo "ALL_TARGETS := core core-examples core-headers";
+      echo "PREFIX := $LIB_INSTALLDIR";
+    ) > make/config.txt
+  - mkdir -p lib/unix obj/unix/debug obj/unix/release
+  - make install
   - popd
   -
   - mkdir -p /tmp/tools

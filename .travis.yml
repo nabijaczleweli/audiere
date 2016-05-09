@@ -59,6 +59,7 @@ install:
       echo "PREFIX := $LIB_INSTALLDIR";
     ) > make/config.txt
   - mkdir -p lib/unix obj/unix/debug obj/unix/release
+  - sed -i 's/OFLAGS :=/\0 -fPIC/g' Makefile Makefile.rdy
   - make install
   - popd
   -

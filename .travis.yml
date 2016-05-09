@@ -1,0 +1,50 @@
+language: generic
+sudo: false
+cache:
+  apt: true
+
+env:
+  global:
+    - LIB_INSTALLDIR="$HOME"
+    - LD_LIBRARY_PATH="$LIB_INSTALLDIR/lib"
+    - SPEEX_VER=1.1.9
+
+matrix:
+  include:
+    - env: CXX=g++-5 CC=gcc-5 DEPLOY=true
+      addons:
+        apt:
+          packages:
+            - g++-5
+            - cmake
+            - libsndfile1-dev
+            - libopenal-dev
+          sources: &sources
+            - r-packages-precise
+            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
+    - env: CXX=clang++-3.8 CC=clang-3.8
+      addons:
+        apt:
+          packages:
+            - clang-3.8
+            - cmake
+            - libsndfile1-dev
+            - libopenal-dev
+          sources: *sources
+
+install:
+  - pushd "/tmp"
+  - curl -SL "http://downloads.xiph.org/releases/speex/speex-$SPEEX_VER.tar.gz" | tar -xzf-
+  - cd "speex-$SPEEX_VER"
+  - curl -SL "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" > config.sub
+  - curl -SL "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" > config.guess
+  - ./configure --prefix="$LIB_INSTALLDIR"
+  - make -j$(nproc) install
+  - popd
+
+script:
+  - mkdir -p build
+  - cd build
+  - CXXFLAGS="-isystem$LIB_INSTALLDIR/include" LDFLAGS="-L$LIB_INSTALLDIR/lib" cmake -G"Unix Makefiles" ..
+  - make -j$(nproc)

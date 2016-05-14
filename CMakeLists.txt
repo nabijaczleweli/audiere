@@ -2,6 +2,16 @@ cmake_minimum_required(VERSION 3.0)
 project(audiere CXX C)
 include(CheckIncludeFileCXX)
 
+set(CPACK_PACKAGE_VENDOR "Chad Austin <aegisk@cs.iastate.edu>")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "9")
+set(CPACK_PACKAGE_VERSION_PATCH "4")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/doc/readme.txt")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Audiere is a high-level audio API. ")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/doc/license.txt")
+set(CPACK_STRIP_FILES TRUE)
+include(CPack)
+
 
 function(find_lib_or_static name optionname)
     find_library(lib NAMES ${name}_static ${name})

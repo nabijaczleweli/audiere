@@ -18,7 +18,7 @@ env:
 
 matrix:
   include:
-    - env: CXX=g++-5 CC=gcc-5
+    - env: CXX=g++-5 CC=gcc-5 DEPLOY=true
       addons:
         apt:
           packages:
@@ -80,6 +80,23 @@ install:
 
 script:
   - mkdir -p build
-  - cd build
+  - pushd build
   - CXXFLAGS="-isystem$LIB_INSTALLDIR/include" LDFLAGS="-L$LIB_INSTALLDIR/lib" cmake -GNinja ..
   - ninja
+  - popd
+
+before_deploy:
+  - export AUDIERE_VER="$(awk -F\" '/.*CPACK_PACKAGE_VERSION_/ {ver[ver_i++]=$2} END {print ver[0] "." ver[1] "." ver[2]}' CMakeLists.txt)"
+  - pushd build
+  - cpack -G "STGZ;TGZ" -B "$HOME/release"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: ucazyCnmBAKNCyWNILCjZSuz1QdIIETBwNUIw1uT4FJp2ByZxJ+T2xRknWkeyEagO8bYzPZ7+WAKZ/PpQMWz5rcbttl5AJPwnb90fylXgtuisC8J1e+V4qf7XOAtQsm4b9txWx3/8vTcXydyCK9mfDLfecLTw/2kyklhERgwe2qK16NEArR9BmNNZaNUkUpkFJhs+rtcFcBN0bHUbsxjO4gOm+d0OzP2EubCZEXVb86Ly4ieboLO2eLYtEPgU9XUaRqb7/7o2Q64aVqwKm5ITKHouvUIycj5f+3axqikRS2n7U0OAvvg7nkcIOmMS7I6g2qJR2BRXPwlFKYm54QQJU4Yci3DdORk5VmrSgOUZp+6iD6E8MilYrAKrI9pqDwE4fBFP2N/yDHHOeCgCkxBRx0ae4o6y34xS3/6/uz9Xe13IGNhdsC+PZBM7ib4Vui08afJk10WrfO+Foi7MorefQgmydtrLmBl5+ZdybI518URdcnCmzWpc9mpb7xyRk+iWZ9cMDmeAoBpNyDi35O9lLEtWpU8HMZmznn4/pRClLrCCw1Xygb+Rpim3cRvktf3lfd7huTh8vlxJOk6nzHAzNGNtwilppZLmRdR7alL2h1svdrOv4YjYD/qMhpdl/RHy+3YNJFqW5ScP5z21n+ZFMESDbtLdqpcLrVp8DgKHt0=
+  file:
+    - "$HOME/release/audiere-$AUDIERE_VER-Linux.sh"
+    - "$HOME/release/audiere-$AUDIERE_VER-Linux.tar.gz"
+  on:
+    tags: true
+    condition: $DEPLOY = true

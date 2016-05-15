@@ -1,0 +1,57 @@
+version: 1.9.4-{build}
+
+branches:
+  except:
+    - doc
+
+environment:
+  CMAKE_VERSION_GENERAL: 3.5
+  CMAKE_VERSION_SPECIFIC: 3.5.2
+
+skip_tags: false
+
+platform: x64
+configuration: Release
+
+clone_folder: C:\audiere
+
+install:
+  - cd C:\
+  - curl -SOL "https://cmake.org/files/v%CMAKE_VERSION_GENERAL%/cmake-%CMAKE_VERSION_SPECIFIC%-win32-x86.msi"
+  - start /w msiexec /qn /quiet /passive /a "cmake-%CMAKE_VERSION_SPECIFIC%-win32-x86.msi" TARGETDIR="C:\Program Files"
+  -
+  - set PATH=C:\Program Files\CMake\bin;C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
+  -
+  - bash -lc "pacman --needed --noconfirm -Sy pacman-mirrors"
+  - bash -lc "pacman --noconfirm -Sy"
+  - bash -lc "pacman --noconfirm -S mingw-w64-x86_64-gcc mingw-w64-x86_64-ninja mingw-w64-x86_64-nsis mingw-w64-x86_64-speex mingw-w64-x86_64-libvorbis mingw-w64-x86_64-flac mingw-w64-x86_64-dumb"
+  -
+  - cd C:\audiere
+  - mkdir release
+
+build: off
+build_script:
+  - mkdir build
+  - cd build
+  - cmake -GNinja ..
+  - ninja
+  - cpack -G "ZIP;NSIS64" -B "C:\audiere\release"
+  - cd ..
+
+artifacts:
+  - path: release\audiere-1.9.4-win64.exe
+  - path: release\audiere-1.9.4-win64.zip
+
+deploy:
+  provider: GitHub
+  artifact: /audiere-.*/
+  auth_token:
+    secure: 4gwiT+4MXG4xW4H0S5R+/Ox/mWZUAWbv6okaNypx+9hDsQq3YDMEJ0cp0dz4AXOH
+  on:
+    appveyor_repo_tag: true
+
+notifications:
+  - provider: Email
+    to:
+      - nabijaczleweli@gmail.com
+    on_build_status_changed: true
